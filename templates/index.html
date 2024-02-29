@@ -3,14 +3,8 @@
 
 {% block body %}
 <div class = "jumbotron text-center" >           
-    <h3>Welcome to my blog.</h3>
-    <p>  Its Cagla.I created this blog with Python.   <p>
+    <h3>Welcome to Brad Yoo Lab.</h3>
+    <p>This site is primarily intended to test and demonstrate the construction of services linked to Google Cloud.<p>
+    <p>You are welcome to send your inquiry to <a href="mailto:bradyoo12@outlook.com">bradyoo12@outlook.com</a></p>
 </div>
-<ul> 
-    {% for  article in articles  %}
-    <li> Article Id : {{article.id}} - Title {{article.title}} - Content: {{article.content}}
-     </li>      
-    
-    {% endfor %}
-</ul>
 {% endblock  %}
