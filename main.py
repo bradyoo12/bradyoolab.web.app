@@ -1,34 +1,34 @@
-from ast import Return
-from colorama import Cursor
+# from ast import Return
+# from colorama import Cursor
 from flask import Flask,render_template,flash,redirect,url_for,session,logging,request
 # from flask_mysqldb import MySQL
-from wtforms import Form,StringField,TextAreaField,PasswordField,validators
-from passlib.hash import sha256_crypt
-from functools import wraps
+# from wtforms import Form,StringField,TextAreaField,PasswordField,validators
+# from passlib.hash import sha256_crypt
+# from functools import wraps
 
 #login decorator
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if "logged_in" in session:
-            return f(*args, **kwargs)
-        else:
-            flash("Please login to view this page","danger")
-            return redirect(url_for("login"))
+# def login_required(f):
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         if "logged_in" in session:
+#             return f(*args, **kwargs)
+#         else:
+#             flash("Please login to view this page","danger")
+#             return redirect(url_for("login"))
         
-    return decorated_function
-#user registration form
-class RegisterForm(Form):
-    name = StringField("Name", validators = [validators.Length(min = 3, max = 25)])
-    username = StringField("Username", validators = [validators.Length(min = 3, max = 35)])
-    email = StringField("email", validators = [validators.Email(message = "please enter a valid email address")])
-    password = PasswordField("Password",validators = [validators.DataRequired("plase enter a password"),
-     validators.EqualTo(fieldname = "confirm",message = "your password does not match")])
-    confirm = PasswordField("verify password")
+#     return decorated_function
+# #user registration form
+# class RegisterForm(Form):
+#     name = StringField("Name", validators = [validators.Length(min = 3, max = 25)])
+#     username = StringField("Username", validators = [validators.Length(min = 3, max = 35)])
+#     email = StringField("email", validators = [validators.Email(message = "please enter a valid email address")])
+#     password = PasswordField("Password",validators = [validators.DataRequired("plase enter a password"),
+#      validators.EqualTo(fieldname = "confirm",message = "your password does not match")])
+#     confirm = PasswordField("verify password")
     
-class LoginForm(Form):
-    username = StringField("Username")
-    password = PasswordField("Password")
+# class LoginForm(Form):
+#     username = StringField("Username")
+#     password = PasswordField("Password")
 
 app = Flask(__name__)
 app.secret_key = "blog"
