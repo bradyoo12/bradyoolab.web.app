@@ -49,10 +49,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
 
-EXPOSE 8501
+EXPOSE 8080
 
-HEALTHCHECK CMD curl --fail http://localhost:8090/_stcore/health
+HEALTHCHECK CMD curl --fail http://localhost:8080/_stcore/health
 
-ENTRYPOINT ["streamlit", "run", "st.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "st.py", "--server.port=8080", "--server.address=0.0.0.0"]
 # [END run_helloworld_dockerfile]
 # [END cloudrun_helloworld_dockerfile]
