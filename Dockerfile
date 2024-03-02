@@ -27,6 +27,7 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY . ./
 
+
 # Install git so that we can clone the app code from a remote repo:
 RUN apt-get update && apt-get install -y \
     build-essential \
