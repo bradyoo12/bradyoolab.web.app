@@ -46,179 +46,179 @@ def index():
 
     return render_template("index.html")
 
-
-@app.route("/vertex_streamlit/")
-def vertex_streamlit(q):
-    import streamlit as st
-    import google.generativeai as genai
-    import time
-    import random
-
-    st.set_page_config(
-        page_title="Chat with Gemini Pro",
-        page_icon="🔥"
-    )
-
-    st.title("Chat with Gemini Pro")
-    st.caption("A Chatbot Powered by Google Gemini Pro")
-
-    if "app_key" not in st.session_state:
-        app_key = st.text_input("Please enter your Gemini API Key", type='password')
-        # AIzaSyCkUm7WtmBQV5cTuMmIjFrneNsx9d1Dtes
-        if app_key:
-            st.session_state.app_key = app_key
-
-    if "history" not in st.session_state:
-        st.session_state.history = []
-
-    try:
-        genai.configure(api_key = st.session_state.app_key)
-    except AttributeError as e:
-        st.warning("Please Put Your Gemini API Key First")
-
-    model = genai.GenerativeModel("gemini-pro")
-    chat = model.start_chat(history = st.session_state.history)
-
-    with st.sidebar:
-        if st.button("Clear Chat Window", use_container_width=True, type="primary"):
-            st.session_state.history = []
-            st.rerun()
-
-    for message in chat.history:
-        role ="assistant" if message.role == 'model' else message.role
-        with st.chat_message(role):
-            st.markdown(message.parts[0].text)
-
-    if "app_key" in st.session_state:
-        if prompt := st.chat_input(""):
-            prompt = prompt.replace('\n', ' \n')
-            with st.chat_message("user"):
-                st.markdown(prompt)
-            with st.chat_message("assistant"):
-                message_placeholder = st.empty()
-                message_placeholder.markdown("Thinking...")
-                try:
-                    full_response = ""
-                    for chunk in chat.send_message(prompt, stream=True):
-                        word_count = 0
-                        random_int = random.randint(5,10)
-                        for word in chunk.text:
-                            full_response+=word
-                            word_count+=1
-                            if word_count == random_int:
-                                time.sleep(0.05)
-                                message_placeholder.markdown(full_response + "_")
-                                word_count = 0
-                                random_int = random.randint(5,10)
-                    message_placeholder.markdown(full_response)
-                except genai.types.generation_types.BlockedPromptException as e:
-                    st.exception(e)
-                except Exception as e:
-                    st.exception(e)
-                st.session_state.history = chat.history
-
-
-
-@app.route("/vertex_chat/<string:q>")
-def vertex_chat(q):
-    # https://cloud.google.com/vertex-ai/generative-ai/docs/chat/test-chat-prompts#chat-query-python_vertex_ai_sdk
-    from vertexai.language_models import ChatModel, InputOutputTextPair
-    chat_model = ChatModel.from_pretrained("chat-bison@001")
-
-    if q == "":
-        q = "How many planets are there in the solar system?"
-    
-    temperature: float = 0.2
-    parameters = {
-        "temperature": temperature,  # Temperature controls the degree of randomness in token selection.
-        "max_output_tokens": 256,  # Token limit determines the maximum amount of text output.
-        "top_p": 0.95,  # Tokens are selected from most probable to least until the sum of their probabilities equals the top_p value.
-        "top_k": 40,  # A top_k of 1 means the selected token is the most probable among all tokens.
-    }
-
-    chat = chat_model.start_chat(
-        context="My name is Miles. You are an astronomer, knowledgeable about the solar system.",
-        examples=[
-            InputOutputTextPair(
-                input_text="How many moons does Mars have?",
-                output_text="The planet Mars has two moons, Phobos and Deimos.",
-            ),
-        ],
-    )
-
-    # response = chat.send_message(
-    #     q, **parameters
-    # )
-    # print(f"Response from Model: {response.text}")
-    # v = {
-    #     "q": q,
-    #     "text": to_markdown(response.text)
-    # }
-    # return render_template("vertex_chat.html", v = v)
-
-    responses = chat.send_message_streaming(
-        message="How many planets are there in the solar system?", **parameters)
-    for response in responses:
-        print(response)
-
-    v = {
-        "q": q,
-        "text": "aaaa"
-    }
-    return render_template("vertex_chat.html", v = v)
-
-def to_markdown(text):
-    import textwrap
-    from IPython.display import Markdown
-    text = text.replace('*', '  *')
-    return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
-
-@app.route("/vertex_ai/<string:q>")
-def vertext_ai(q):
-
-    # 
-    import vertexai
-    from vertexai.preview.generative_models import GenerativeModel, Part
-    import vertexai.preview.generative_models as generative_models
-    import markdown
-    from render_html import render_in_browser as ren
-    import html
-
-    if q == "":
-        q = "What makes our life happy?"
-        
-    vertexai.init(project="angular-axle-415015", location="us-central1")
-    model = GenerativeModel("gemini-1.0-pro-001")
-    responses = model.generate_content(
-        q,
-        generation_config={
-            "max_output_tokens": 2048,
-            "temperature": 0.9,
-            "top_p": 1
-        },
-        safety_settings={
-                generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-                generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        }
-    # stream=True,
-    )
-
-    # for response in responses:
-    #     print(response.text, end="")
-
-    # markdown.markdown(v.response, output_format='html')
-    # v = { "q": q, "response": markdown.markdown(responses.text, output_format='html') }
-    v = { "q": q, "response": responses.text }
-    return render_template("vertex_ai.html", v = v)
-    # return ren(markdown.markdown(responses.text, output_format='html'))
-
 @app.route("/about")
 def about():
     return render_template("about.html")
 
 if __name__ == "__main__":    app.run(debug=True)
+
+
+# @app.route("/vertex_streamlit/")
+# def vertex_streamlit(q):
+#     import streamlit as st
+#     import google.generativeai as genai
+#     import time
+#     import random
+
+#     st.set_page_config(
+#         page_title="Chat with Gemini Pro",
+#         page_icon="🔥"
+#     )
+
+#     st.title("Chat with Gemini Pro")
+#     st.caption("A Chatbot Powered by Google Gemini Pro")
+
+#     if "app_key" not in st.session_state:
+#         app_key = st.text_input("Please enter your Gemini API Key", type='password')
+#         # AIzaSyCkUm7WtmBQV5cTuMmIjFrneNsx9d1Dtes
+#         if app_key:
+#             st.session_state.app_key = app_key
+
+#     if "history" not in st.session_state:
+#         st.session_state.history = []
+
+#     try:
+#         genai.configure(api_key = st.session_state.app_key)
+#     except AttributeError as e:
+#         st.warning("Please Put Your Gemini API Key First")
+
+#     model = genai.GenerativeModel("gemini-pro")
+#     chat = model.start_chat(history = st.session_state.history)
+
+#     with st.sidebar:
+#         if st.button("Clear Chat Window", use_container_width=True, type="primary"):
+#             st.session_state.history = []
+#             st.rerun()
+
+#     for message in chat.history:
+#         role ="assistant" if message.role == 'model' else message.role
+#         with st.chat_message(role):
+#             st.markdown(message.parts[0].text)
+
+#     if "app_key" in st.session_state:
+#         if prompt := st.chat_input(""):
+#             prompt = prompt.replace('\n', ' \n')
+#             with st.chat_message("user"):
+#                 st.markdown(prompt)
+#             with st.chat_message("assistant"):
+#                 message_placeholder = st.empty()
+#                 message_placeholder.markdown("Thinking...")
+#                 try:
+#                     full_response = ""
+#                     for chunk in chat.send_message(prompt, stream=True):
+#                         word_count = 0
+#                         random_int = random.randint(5,10)
+#                         for word in chunk.text:
+#                             full_response+=word
+#                             word_count+=1
+#                             if word_count == random_int:
+#                                 time.sleep(0.05)
+#                                 message_placeholder.markdown(full_response + "_")
+#                                 word_count = 0
+#                                 random_int = random.randint(5,10)
+#                     message_placeholder.markdown(full_response)
+#                 except genai.types.generation_types.BlockedPromptException as e:
+#                     st.exception(e)
+#                 except Exception as e:
+#                     st.exception(e)
+#                 st.session_state.history = chat.history
+
+
+
+# @app.route("/vertex_chat/<string:q>")
+# def vertex_chat(q):
+#     # https://cloud.google.com/vertex-ai/generative-ai/docs/chat/test-chat-prompts#chat-query-python_vertex_ai_sdk
+#     from vertexai.language_models import ChatModel, InputOutputTextPair
+#     chat_model = ChatModel.from_pretrained("chat-bison@001")
+
+#     if q == "":
+#         q = "How many planets are there in the solar system?"
+    
+#     temperature: float = 0.2
+#     parameters = {
+#         "temperature": temperature,  # Temperature controls the degree of randomness in token selection.
+#         "max_output_tokens": 256,  # Token limit determines the maximum amount of text output.
+#         "top_p": 0.95,  # Tokens are selected from most probable to least until the sum of their probabilities equals the top_p value.
+#         "top_k": 40,  # A top_k of 1 means the selected token is the most probable among all tokens.
+#     }
+
+#     chat = chat_model.start_chat(
+#         context="My name is Miles. You are an astronomer, knowledgeable about the solar system.",
+#         examples=[
+#             InputOutputTextPair(
+#                 input_text="How many moons does Mars have?",
+#                 output_text="The planet Mars has two moons, Phobos and Deimos.",
+#             ),
+#         ],
+#     )
+
+#     # response = chat.send_message(
+#     #     q, **parameters
+#     # )
+#     # print(f"Response from Model: {response.text}")
+#     # v = {
+#     #     "q": q,
+#     #     "text": to_markdown(response.text)
+#     # }
+#     # return render_template("vertex_chat.html", v = v)
+
+#     responses = chat.send_message_streaming(
+#         message="How many planets are there in the solar system?", **parameters)
+#     for response in responses:
+#         print(response)
+
+#     v = {
+#         "q": q,
+#         "text": "aaaa"
+#     }
+#     return render_template("vertex_chat.html", v = v)
+
+# def to_markdown(text):
+#     import textwrap
+#     from IPython.display import Markdown
+#     text = text.replace('*', '  *')
+#     return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
+
+# @app.route("/vertex_ai/<string:q>")
+# def vertext_ai(q):
+
+#     # 
+#     import vertexai
+#     from vertexai.preview.generative_models import GenerativeModel, Part
+#     import vertexai.preview.generative_models as generative_models
+#     import markdown
+#     from render_html import render_in_browser as ren
+#     import html
+
+#     if q == "":
+#         q = "What makes our life happy?"
+        
+#     vertexai.init(project="angular-axle-415015", location="us-central1")
+#     model = GenerativeModel("gemini-1.0-pro-001")
+#     responses = model.generate_content(
+#         q,
+#         generation_config={
+#             "max_output_tokens": 2048,
+#             "temperature": 0.9,
+#             "top_p": 1
+#         },
+#         safety_settings={
+#                 generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+#                 generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+#                 generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+#                 generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+#         }
+#     # stream=True,
+#     )
+
+#     # for response in responses:
+#     #     print(response.text, end="")
+
+#     # markdown.markdown(v.response, output_format='html')
+#     # v = { "q": q, "response": markdown.markdown(responses.text, output_format='html') }
+#     v = { "q": q, "response": responses.text }
+#     return render_template("vertex_ai.html", v = v)
+#     # return ren(markdown.markdown(responses.text, output_format='html'))
 
 # #article site
 # @app.route("/articles")
