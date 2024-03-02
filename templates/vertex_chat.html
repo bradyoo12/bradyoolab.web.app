@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h3>Vertex AI</h3>
+
+<hr>                                   
+<p>Your question: <input type="text" name="q" value="{{ v.q }}" style="width: 100%">
+<p>Answer:
+    <span class="raw-html">{{ v.response }}</span>
+</p>
+
+<hr>
+
+{% endblock  %}
