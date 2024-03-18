@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h3>Korean Income Tax Accountant</h3>
+
+<hr>                                   
+<form method="post">
+    <p>Your question: <textarea name="q" style="width: 100%" rows="12">{{ v.q }}</textarea>
+        <button>Submit</button>
+    <p>Answer: 
+        <span class="raw-html" style="white-space: pre-line">{{ v.a }}</span>
+    </p>
+</form>
+<hr>
+
+{% endblock  %}

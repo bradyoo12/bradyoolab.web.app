@@ -15,7 +15,7 @@ from flask import Flask,render_template,flash,redirect,url_for,session,logging,r
 #         else:
 #             flash("Please login to view this page","danger")
 #             return redirect(url_for("login"))
-        
+
 #     return decorated_function
 # #user registration form
 # class RegisterForm(Form):
@@ -25,7 +25,7 @@ from flask import Flask,render_template,flash,redirect,url_for,session,logging,r
 #     password = PasswordField("Password",validators = [validators.DataRequired("plase enter a password"),
 #      validators.EqualTo(fieldname = "confirm",message = "your password does not match")])
 #     confirm = PasswordField("verify password")
-    
+
 # class LoginForm(Form):
 #     username = StringField("Username")
 #     password = PasswordField("Password")
@@ -45,6 +45,50 @@ app.secret_key = "blog"
 def index():
 
     return render_template("index.html")
+
+@app.route("/korean_income_tax/", methods = ['POST', 'GET'])
+def korean_income_tax():
+    import vertexai
+    from vertexai.language_models import CodeChatModel
+
+    q = ''
+    if request.method == 'GET':
+        q = request.args.get('q')
+    else:
+        q = request.form.get('q')
+        
+    v = {}
+    if q == None:
+        v = { 'q': """과세표준과 기본 세율이 아래와 같고 퇴직연금과 급여공제가 없는 경우,  연봉 1억 받는 직장인의 소득세를 계산해줘.
+1,400만원 이하	과세표준의 6%
+1,400만원 초과~5,000만원 이하	84만원 + (1,400만원 초과금액의 15%)
+5,000만원 초과~8,800만원 이하	624만원 + (5,000만원 초과금액의 24%)
+8,800만원 초과~1억5천만원 이하	1,536만원 + (8,800만원 초과금액의 35%)
+1억5천만원 초과~3억원 이하	3,706만원 + (1억5천만원 초과금액의 38%)
+3억원 초과~5억원 이하	9,406만원 + (3억원 초과금액의 40%)
+5억원 초과~10억원 이하	17,406만원 + (5억원 초과금액의 42%)
+10억원 초과	38,406만원 + (10억원 초과금액의 45%)"""
+        }
+    else:        
+        vertexai.init(project="eng-genius-417105", location="us-central1")
+        chat_model = CodeChatModel.from_pretrained("codechat-bison")
+        chat = chat_model.start_chat()
+        parameters = {
+            "candidate_count": 1,
+            "max_output_tokens": 1024,
+            "temperature": 0.5
+        }
+        
+        response = chat.send_message(q, **parameters)
+        v = { "q": q, "a": response.text }
+    # safety_settings={
+    #         generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    #         generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    #         generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    #         generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    #     }
+    
+    return render_template("korean_income_tax.html", v = v)
 
 @app.route("/about")
 def about():
@@ -133,7 +177,7 @@ if __name__ == "__main__":    app.run(debug=True)
 
 #     if q == "":
 #         q = "How many planets are there in the solar system?"
-    
+
 #     temperature: float = 0.2
 #     parameters = {
 #         "temperature": temperature,  # Temperature controls the degree of randomness in token selection.
@@ -182,7 +226,7 @@ if __name__ == "__main__":    app.run(debug=True)
 # @app.route("/vertex_ai/<string:q>")
 # def vertext_ai(q):
 
-#     # 
+#     #
 #     import vertexai
 #     from vertexai.preview.generative_models import GenerativeModel, Part
 #     import vertexai.preview.generative_models as generative_models
@@ -192,7 +236,7 @@ if __name__ == "__main__":    app.run(debug=True)
 
 #     if q == "":
 #         q = "What makes our life happy?"
-        
+
 #     vertexai.init(project="angular-axle-415015", location="us-central1")
 #     model = GenerativeModel("gemini-1.0-pro-001")
 #     responses = model.generate_content(
@@ -387,7 +431,7 @@ if __name__ == "__main__":    app.run(debug=True)
 #         mysql.connection.commit()
 #         flash("Article is updated successfully!","success")
 #         return redirect(url_for("dashboard"))
-        
+
 
 # #search url
 # @app.route("/search",methods = ["GET","POST"])
