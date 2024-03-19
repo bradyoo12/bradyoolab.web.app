@@ -1,6 +1,7 @@
 # from ast import Return
 # from colorama import Cursor
 from flask import Flask,render_template,flash,redirect,url_for,session,logging,request
+import os
 # from flask_mysqldb import MySQL
 # from wtforms import Form,StringField,TextAreaField,PasswordField,validators
 # from passlib.hash import sha256_crypt
@@ -70,7 +71,7 @@ def korean_income_tax():
 10억원 초과	38,406만원 + (10억원 초과금액의 45%)"""
         }
     else:        
-        vertexai.init(project="eng-genius-417105", location="us-central1")
+        vertexai.init(project=os.getenv('project_id'), location=os.getenv('region'))
         chat_model = CodeChatModel.from_pretrained("codechat-bison")
         chat = chat_model.start_chat()
         parameters = {
