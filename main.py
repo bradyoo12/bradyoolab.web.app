@@ -71,7 +71,7 @@ def korean_income_tax():
 10억원 초과	38,406만원 + (10억원 초과금액의 45%)"""
         }
     else:        
-        vertexai.init(project=os.getenv('project_id'), location=os.getenv('region'))
+        vertexai.init()#project=os.getenv('project_id'), location=os.getenv('region'))
         chat_model = CodeChatModel.from_pretrained("codechat-bison")
         chat = chat_model.start_chat()
         parameters = {
