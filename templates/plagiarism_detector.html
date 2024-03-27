@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h3>Plagiarism Detector</h3>
+
+<hr>                                   
+<form method="post">
+    <p>
+        <h4>Your question:</h4>
+        <textarea name="q" style="width: 100%" rows="12">{{ v.q }}</textarea>
+    </p>
+    <p>
+        <h4>Student's Answer:</h4>
+        <textarea name="student_answer" style="width: 100%" rows="12">{{ v.student_answer }}</textarea>
+        <button>Submit</button>
+    </p>
+    <div>
+        <h4>ChatGPT's Answers: </h4>
+        <p class="raw-html" style="white-space: pre-line; border-style: ridge;">{{ v.ai_answer }}</p>
+    </div>
+    <div>
+        <h4>Plagiarism details: </h4>
+        <p>Plagiarism rate is {{ v.plagiarism_rate }}%. (plagiarism_count {{ v.plagiarism_count }} / total sentences {{ v.total_student_answer_sentence_count }})</p>
+        <p>
+            <strong>plagiarism sentences:</strong>
+            {% for sentence in v.plagiarism_sentences %}
+            <br />{{ sentence }}
+            {% endfor %}
+        </p>
+</form>
+<hr>
+
+{% endblock  %}

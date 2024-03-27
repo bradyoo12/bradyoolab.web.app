@@ -11,3 +11,6 @@ render_html
 Markdown
 streamlit
 google-generativeai
+langchain
+langchain_openai
+#openai

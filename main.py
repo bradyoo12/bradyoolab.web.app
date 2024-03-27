@@ -91,6 +91,76 @@ def korean_income_tax():
     
     return render_template("korean_income_tax.html", v = v)
 
+
+@app.route("/plagiarism_detector", methods = ['POST', 'GET'])
+def plagiarism_detector():
+    from langchain_openai import ChatOpenAI
+    from langchain_core.messages import HumanMessage, SystemMessage
+    from langchain_core.prompts.chat import (
+        ChatPromptTemplate,
+        HumanMessagePromptTemplate,
+        SystemMessagePromptTemplate,
+    )
+
+    q = ''
+    if request.method == 'GET':
+        q = request.args.get('q')
+    else:
+        q = request.form.get('q')
+        
+    v = {}
+    chat = ChatOpenAI(api_key=os.getenv('openai_api_key'))
+    if q == None:
+        q = """Plastic pollution is currently the most widespread problem affecting the marine environment. It threatens ocean health, human health, coastal tourism, and also contributes to climate change.
+
+Write a recommendation/proposal to your local council, suggesting ways we can reduce plastic waste and reduce pollution."""
+    
+    messages = [
+        SystemMessage(
+            content="You are a helpful assistant that answers given question."
+        ),
+        HumanMessage(
+            content=q
+        )
+    ]
+    response = chat.invoke(messages)
+    ai_answer = response.content
+    
+    if request.method == 'GET':
+    
+        v = { 'q': q, "student_answer": ai_answer }
+    else:  
+        splitter ='\n'
+        student_answer = request.form.get('student_answer')
+        student_answer_sentences = [item.strip() for item in student_answer.split(splitter) if item.strip() != '']
+        total_student_answer_sentence_count = len(student_answer_sentences)
+
+        ai_answer_sentences = [item.strip() for item in ai_answer.split(splitter)]
+        plagiarism_sentences = []
+        # total_ai_answer_sentence_count = len(ai_answer_sentences)
+        for i in student_answer_sentences:
+            if i in ai_answer_sentences:
+                plagiarism_sentences.append(i) 
+        plagiarism_count = len(plagiarism_sentences)
+
+        v = { "q": q, 
+             "student_answer": student_answer, 
+             "ai_answer": ai_answer, 
+             "plagiarism_sentences": plagiarism_sentences,
+             "plagiarism_count": plagiarism_count, 
+             "total_student_answer_sentence_count": total_student_answer_sentence_count,
+             "plagiarism_rate": (int) (plagiarism_count / total_student_answer_sentence_count * 100)
+              }
+
+    # safety_settings={
+    #         generative_models.HarmCategory.HARM_CATEGORY_HATE_SPEECH: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    #         generative_models.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    #         generative_models.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    #         generative_models.HarmCategory.HARM_CATEGORY_HARASSMENT: generative_models.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    #     }
+    
+    return render_template("plagiarism_detector.html", v = v)
+
 @app.route("/about")
 def about():
     return render_template("about.html")
