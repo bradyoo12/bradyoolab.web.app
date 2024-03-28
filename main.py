@@ -1,45 +1,13 @@
-# from ast import Return
-# from colorama import Cursor
 from flask import Flask,render_template,flash,redirect,url_for,session,logging,request
 import os
-# from flask_mysqldb import MySQL
-# from wtforms import Form,StringField,TextAreaField,PasswordField,validators
-# from passlib.hash import sha256_crypt
-# from functools import wraps
+from dotenv import load_dotenv
 
-#login decorator
-# def login_required(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         if "logged_in" in session:
-#             return f(*args, **kwargs)
-#         else:
-#             flash("Please login to view this page","danger")
-#             return redirect(url_for("login"))
-
-#     return decorated_function
-# #user registration form
-# class RegisterForm(Form):
-#     name = StringField("Name", validators = [validators.Length(min = 3, max = 25)])
-#     username = StringField("Username", validators = [validators.Length(min = 3, max = 35)])
-#     email = StringField("email", validators = [validators.Email(message = "please enter a valid email address")])
-#     password = PasswordField("Password",validators = [validators.DataRequired("plase enter a password"),
-#      validators.EqualTo(fieldname = "confirm",message = "your password does not match")])
-#     confirm = PasswordField("verify password")
-
-# class LoginForm(Form):
-#     username = StringField("Username")
-#     password = PasswordField("Password")
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = "blog"
 
-# app.config["MYSQL_HOST"] ="localhost"
-# app.config["MYSQL_USER"] ="root"
 # app.config["MYSQL_PASSWORD"] =""
-# app.config["MYSQL_DB"] ="blog"
-# app.config["MYSQL_CURSORCLASS"] = "DictCursor"
-
 # mysql = MySQL(app)
 
 @app.route("/")
@@ -125,7 +93,7 @@ Write a recommendation/proposal to your local council, suggesting ways we can re
     ]
     response = chat.invoke(messages)
     ai_answer = response.content
-    
+
     if request.method == 'GET':
     
         v = { 'q': q, "student_answer": ai_answer }
